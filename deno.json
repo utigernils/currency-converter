@@ -4,6 +4,7 @@
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
+    "@std/cli": "jsr:@std/cli@^1.0.24",
     "@std/encoding": "jsr:@std/encoding@^1.0.10"
   }
 }

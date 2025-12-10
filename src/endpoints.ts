@@ -2,6 +2,7 @@ import { decodeBase64 } from "@std/encoding/base64";
 import { RequestParam } from "./types.ts";
 import { Converter } from "./conversion.ts";
 import { err, ok } from "./http.ts";
+import { isCurrency } from "./validation.ts";
 
 export function authenticate(r: Request): boolean {
   const auth = r.headers.get("authorization") || "";
@@ -27,11 +28,7 @@ export function putRate(_req: Request, param: RequestParam): Response {
   if (param.value <= 0.0) {
     return err({ message: "the exchange rate must be a positive number" }, 400);
   }
-  const currencyCode = /^[a-z]{3}$/;
-  if (
-    !currencyCode.test(param.fromCurrency) ||
-    !currencyCode.test(param.toCurrency)
-  ) {
+  if (!isCurrency(param.fromCurrency) || !isCurrency(param.toCurrency)) {
     return err(
       { message: "currency codes must be three-letter lower-case strings" },
       400,

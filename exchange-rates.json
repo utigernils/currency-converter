@@ -1,0 +1,5 @@
+[
+  { "fromCurrency": "usd", "toCurrency": "chf", "exchangeRate": 0.81 },
+  { "fromCurrency": "eur", "toCurrency": "chf", "exchangeRate": 0.94 },
+  { "fromCurrency": "chf", "toCurrency": "gbp", "exchangeRate": 0.93 }
+]
