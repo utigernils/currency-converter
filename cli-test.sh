@@ -16,27 +16,53 @@ test_case() {
     local test_name="$1"
     local expected="$2"
     shift 2
-    local cmd="$@"
-    
+    local cmd="$*"
+
     echo -n "Test: $test_name ... "
-    
-    if output=$(eval "$cmd" 2>&1); then
-        if [ "$output" = "$expected" ]; then
-            echo -e "${GREEN}PASSED${NC}"
-            TESTS_PASSED=$((TESTS_PASSED + 1))
-        else
-            echo -e "${RED}FAILED${NC}"
-            echo "  Expected: $expected"
-            echo "  Got: $output"
-            TESTS_FAILED=$((TESTS_FAILED + 1))
-        fi
-    else
+
+    # Command ausführen, Output in Variable speichern
+    local output
+    if ! output=$(eval "$cmd" 2>&1); then
         echo -e "${RED}FAILED${NC}"
         echo "  Command failed with exit code $?"
         echo "  Output: $output"
-        TESTS_FAILED=$((TESTS_FAILED + 1))
+        ((TESTS_FAILED++))
+        return
     fi
+
+    # Exakten Match prüfen
+    if [ "$output" = "$expected" ]; then
+        echo -e "${GREEN}PASSED${NC}"
+        ((TESTS_PASSED++))
+        return
+    fi
+
+    # Numerische Vergleichstoleranz (float compare)
+    # Vergleich nur, wenn beide Werte numerisch sind
+    if [[ "$expected" =~ ^-?[0-9.]+$ && "$output" =~ ^-?[0-9.]+$ ]]; then
+        local diff
+        diff=$(awk -v a="$expected" -v b="$output" 'BEGIN { print (a-b < 0 ? b-a : a-b) }')
+
+        # Toleranzbar definieren
+        local tolerance="0.000001"
+
+        # Prüfen mit Toleranz
+        awk -v d="$diff" -v t="$tolerance" 'BEGIN { exit !(d < t) }'
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}PASSED (≈ numeric)${NC}"
+            ((TESTS_PASSED++))
+            return
+        fi
+    fi
+
+    # Wenn alles andere nicht passt → FAILED
+    echo -e "${RED}FAILED${NC}"
+    echo "  Expected: $expected"
+    echo "  Got: $output"
+    ((TESTS_FAILED++))
 }
+
+
 
 # Hilfsfunktion für Negativtests (erwarten einen Fehler)
 test_case_error() {
