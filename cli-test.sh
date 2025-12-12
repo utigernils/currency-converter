@@ -100,6 +100,7 @@ test_case "CHF to GBP conversion" \
 
 # Test 4: Konversion mit unbekannter Währung (Negativtest - GBP -> USD)
 test_case_error "Unknown currency pair (GBP to USD)" \
+    "undefined"
     "deno run --allow-read src/cli.ts --rates=exchange-rates.json --from=gbp --to=usd --amount=100"
 
 # Test 5: Konversion mit kleinem Betrag
